@@ -2,7 +2,12 @@ import Image from "next/image";
 
 export default function Home() {
   return (
-    <div className="container" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <div className="container" style={{ 
+      minHeight: '100vh', 
+      display: 'flex', 
+      flexDirection: 'column',
+      backgroundImage: `radial-gradient(at 0% 0%, var(--glass-border) 0, transparent 50%), radial-gradient(at 50% 100%, var(--glass-border) 0, transparent 50%)`
+    }}>
       {/* Header / Nav */}
       <header className="glass" style={{
         position: 'sticky',
@@ -125,15 +130,8 @@ export default function Home() {
       }}>
         © 2026 BIM Data Manager Pro. Precisione e Design nel settore AEC.
       </footer>
-
-      <style jsx>{`
-        .container {
-          background-image: 
-            radial-gradient(at 0% 0%, var(--glass-border) 0, transparent 50%),
-            radial-gradient(at 50% 100%, var(--glass-border) 0, transparent 50%);
-        }
-      `}</style>
     </div>
+
   );
 }
 
