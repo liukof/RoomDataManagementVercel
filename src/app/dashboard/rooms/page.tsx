@@ -3,29 +3,31 @@
 import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import styles from '../dashboard.module.css';
-import { Map as MapIcon, Search, Plus, Trash2, Save } from 'lucide-react';
+import { Map as MapIcon, Search, Plus, Save, Trash2 } from 'lucide-react';
 
-export default function RoomsManagement() {
+export default function RoomsPage() {
     const [rooms, setRooms] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
 
+    // 1. Caricamento dati (equivalente a supabase.table("rooms").select)
     useEffect(() => {
+        const fetchRooms = async () => {
+            const supabase = createClient();
+            const { data, error } = await supabase
+                .from('rooms')
+                .select('*')
+                .order('room_number', { ascending: true });
+
+            if (!error && data) {
+                setRooms(data);
+            }
+            setLoading(false);
+        };
         fetchRooms();
     }, []);
 
-    const fetchRooms = async () => {
-        const supabase = createClient();
-        const { data, error } = await supabase
-            .from('rooms')
-            .select('*')
-            .order('room_number', { ascending: true });
-
-        if (!error && data) setRooms(data);
-        setLoading(false);
-    };
-
-    // Filtro ricerca (logica simile al tuo Streamlit)
+    // 2. Logica di ricerca (equivalente al filtro search_q in Streamlit)
     const filteredRooms = rooms.filter(room => 
         room.room_number?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         room.room_name_planned?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -38,7 +40,7 @@ export default function RoomsManagement() {
                     <h1 className={styles.welcomeText}>📍 Rooms Management</h1>
                 </header>
 
-                {/* Statistiche come nel tuo Streamlit */}
+                {/* Grid statistiche */}
                 <section className={styles.statsGrid}>
                     <div className={styles.statCard}>
                         <div className={styles.statInfo}>
@@ -62,35 +64,40 @@ export default function RoomsManagement() {
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
                         </div>
+                        <button className={styles.addBtn}>
+                            <Plus size={18} /> Nuovo Locale
+                        </button>
                     </div>
 
                     <div className={styles.tableWrapper}>
                         <table className={styles.dataTable}>
                             <thead>
                                 <tr>
-                                    <th className={styles.tableHeaderCell}>STATUS</th>
-                                    <th className={styles.tableHeaderCell}>NUMBER</th>
-                                    <th className={styles.tableHeaderCell}>NAME</th>
+                                    <th className={styles.tableHeaderCell}>SYNC</th>
+                                    <th className={styles.tableHeaderCell}>NUMERO</th>
+                                    <th className={styles.tableHeaderCell}>NOME PIANIFICATO</th>
                                     <th className={styles.tableHeaderCell}>AREA (m²)</th>
-                                    <th className={styles.tableHeaderCell}>LAST SYNC</th>
+                                    <th className={styles.tableHeaderCell}>ULTIMO SYNC</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {loading ? (
-                                    <tr><td colSpan={5} style={{textAlign:'center', padding:'2rem'}}>Caricamento...</td></tr>
-                                ) : filteredRooms.map((room: any) => (
-                                    <tr key={room.id}>
-                                        <td className={styles.tableCell}>
-                                            {room.is_synced ? "✅" : "❌"}
-                                        </td>
-                                        <td className={styles.tableCell}><strong>{room.room_number}</strong></td>
-                                        <td className={styles.tableCell}>{room.room_name_planned}</td>
-                                        <td className={styles.tableCell}>{room.area || 0} m²</td>
-                                        <td className={styles.tableCell}>
-                                            {room.last_sync_at ? new Date(room.last_sync_at).toLocaleDateString() : "Mai"}
-                                        </td>
-                                    </tr>
-                                ))}
+                                    <tr><td colSpan={5} style={{textAlign: 'center', padding: '2rem'}}>Caricamento...</td></tr>
+                                ) : (
+                                    filteredRooms.map((room: any) => (
+                                        <tr key={room.id}>
+                                            <td className={styles.tableCell}>
+                                                {room.is_synced ? "✅" : "❌"}
+                                            </td>
+                                            <td className={styles.tableCell}><strong>{room.room_number}</strong></td>
+                                            <td className={styles.tableCell}>{room.room_name_planned}</td>
+                                            <td className={styles.tableCell}>{room.area || 0} m²</td>
+                                            <td className={styles.tableCell}>
+                                                {room.last_sync_at ? new Date(room.last_sync_at).toLocaleDateString() : "Mai"}
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
                             </tbody>
                         </table>
                     </div>
