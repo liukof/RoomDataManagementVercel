@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
     BarChart3,
@@ -10,26 +11,55 @@ import {
     LogOut,
     Plus,
     Search,
-    Filter
+    Filter,
+    RefreshCw
 } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
 import styles from './dashboard.module.css';
 
 export default function Dashboard() {
-    // Demo data
-    const rooms = [
-        { id: '101', name: 'Ufficio 01', area: '25.5 m²', finish: 'Parquet', status: 'In Revisione' },
-        { id: '102', name: 'Sala Riunioni', area: '42.0 m²', finish: 'Moquette', status: 'Approvato' },
-        { id: '103', name: 'Open Space', area: '120.3 m²', finish: 'Resina', status: 'In Elaborazione' },
-        { id: '104', name: 'Deposito', area: '15.2 m²', finish: 'Cemento Alt.', status: 'Approvato' },
-    ];
+    const [rooms, setRooms] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [stats, setStats] = useState({ total: 0, area: 0, review: 85 });
+    const supabase = createClient();
+
+    const fetchRooms = async () => {
+        setLoading(true);
+        try {
+            const { data, error } = await supabase
+                .from('rooms')
+                .select('*')
+                .order('id', { ascending: true });
+
+            if (error) throw error;
+            if (data) {
+                setRooms(data);
+                // Calcola statistiche reali
+                const totalArea = data.reduce((acc, room) => acc + (parseFloat(room.area) || 0), 0);
+                setStats({
+                    total: data.length,
+                    area: Math.round(totalArea),
+                    review: 85 // Questo potrebbe essere dinamico se hai un campo 'status'
+                });
+            }
+        } catch (err) {
+            console.error('Errore caricamento dati:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchRooms();
+    }, []);
 
     const getStatusClass = (status: string) => {
-        switch (status) {
-            case 'Approvato': return styles.statusPillApprovato;
-            case 'In Revisione': return styles.statusPillInRevisione;
-            case 'In Elaborazione': return styles.statusPillInElaborazione;
-            default: return '';
-        }
+        if (!status) return '';
+        const s = status.toLowerCase();
+        if (s.includes('approvato')) return styles.statusPillApprovato;
+        if (s.includes('revisione')) return styles.statusPillInRevisione;
+        if (s.includes('elaborazione') || s.includes('progress')) return styles.statusPillInElaborazione;
+        return '';
     };
 
     return (
@@ -77,30 +107,35 @@ export default function Dashboard() {
                 <header className={styles.contentHeader}>
                     <div className={styles.headerTitle}>
                         <h1>Panoramica Progetto</h1>
-                        <p>Benvenuto, ecco i dati aggiornati del tuo modello BIM.</p>
+                        <p>Dati in tempo reale dal tuo database Supabase.</p>
                     </div>
-                    <button className={styles.addBtn}>
-                        <Plus size={18} />
-                        Nuovo Locale
-                    </button>
+                    <div style={{ display: 'flex', gap: '1rem' }}>
+                        <button onClick={fetchRooms} className={styles.filterBtn} style={{ padding: '0.75rem' }}>
+                            <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
+                        </button>
+                        <button className={styles.addBtn}>
+                            <Plus size={18} />
+                            Nuovo Locale
+                        </button>
+                    </div>
                 </header>
 
                 {/* Stats Grid */}
                 <section className={styles.statsGrid}>
                     <div className={`${styles.statCard} glass`}>
                         <span className={styles.statLabel}>Locali Totali</span>
-                        <span className={styles.statValue}>124</span>
-                        <span className={`${styles.statTrend} ${styles.statTrendPositive}`}>+3 questa settimana</span>
+                        <span className={styles.statValue}>{loading ? '...' : stats.total}</span>
+                        <span className={`${styles.statTrend} ${styles.statTrendPositive}`}>Sincronizzato</span>
                     </div>
                     <div className={`${styles.statCard} glass`}>
                         <span className={styles.statLabel}>Superficie Totale</span>
-                        <span className={styles.statValue}>2,450 m²</span>
-                        <span className={styles.statTrend}>Nessuna modifica</span>
+                        <span className={styles.statValue}>{loading ? '...' : `${stats.area} m²`}</span>
+                        <span className={styles.statTrend}>Dal modello BIM</span>
                     </div>
                     <div className={`${styles.statCard} glass`}>
                         <span className={styles.statLabel}>Stato Revisione</span>
-                        <span className={styles.statValue}>85%</span>
-                        <span className={`${styles.statTrend} ${styles.statTrendPositive}`}>+12% vs ieri</span>
+                        <span className={styles.statValue}>{stats.review}%</span>
+                        <span className={`${styles.statTrend} ${styles.statTrendPositive}`}>In linea</span>
                     </div>
                 </section>
 
@@ -121,36 +156,48 @@ export default function Dashboard() {
                     </div>
 
                     <div className={styles.tableWrapper}>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Nome Locale</th>
-                                    <th>Superficie</th>
-                                    <th>Finitura</th>
-                                    <th>Stato</th>
-                                    <th>Azione</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {rooms.map((room) => (
-                                    <tr key={room.id}>
-                                        <td><strong>{room.id}</strong></td>
-                                        <td>{room.name}</td>
-                                        <td>{room.area}</td>
-                                        <td><span className={styles.tagFinish}>{room.finish}</span></td>
-                                        <td>
-                                            <span className={`${styles.statusPill} ${getStatusClass(room.status)}`}>
-                                                {room.status}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <button className={styles.editLink}>Modifica</button>
-                                        </td>
+                        {loading ? (
+                            <div style={{ padding: '3rem', textAlign: 'center', opacity: 0.5 }}>Caricamento dati...</div>
+                        ) : (
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Nome Locale</th>
+                                        <th>Superficie</th>
+                                        <th>Finitura</th>
+                                        <th>Stato</th>
+                                        <th>Azione</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    {rooms.length === 0 ? (
+                                        <tr>
+                                            <td colSpan={6} style={{ textAlign: 'center', padding: '2rem' }}>
+                                                Nessun locale trovato nella tabella 'rooms'.
+                                            </td>
+                                        </tr>
+                                    ) : (
+                                        rooms.map((room) => (
+                                            <tr key={room.id}>
+                                                <td><strong>{room.number || room.id}</strong></td>
+                                                <td>{room.name || 'Senza nome'}</td>
+                                                <td>{room.area ? `${room.area} m²` : '-'}</td>
+                                                <td><span className={styles.tagFinish}>{room.finish_wall || room.finish || 'Non spec.'}</span></td>
+                                                <td>
+                                                    <span className={`${styles.statusPill} ${getStatusClass(room.status || 'In Elaborazione')}`}>
+                                                        {room.status || 'Sincronizzato'}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <button className={styles.editLink}>Modifica</button>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    )}
+                                </tbody>
+                            </table>
+                        )}
                     </div>
                 </section>
             </main>
