@@ -68,7 +68,8 @@
   text-align: left;
 }
 
-.navItem:hover, .navItem.active {
+.navItem:hover,
+.navItem.active {
   opacity: 1;
   background: rgba(59, 130, 246, 0.1);
   color: var(--accent);
@@ -102,13 +103,13 @@
   margin-bottom: 2.5rem;
 }
 
-.headerTitle h1 {
+.headerTitleH1 {
   font-size: 1.875rem;
   font-weight: 700;
   margin-bottom: 0.5rem;
 }
 
-.headerTitle p {
+.headerTitleP {
   opacity: 0.6;
 }
 
@@ -181,7 +182,7 @@
   margin-bottom: 1.5rem;
 }
 
-.tableHeader h2 {
+.tableHeaderH2 {
   font-size: 1.25rem;
   font-weight: 700;
 }
@@ -195,7 +196,7 @@
   position: relative;
   display: flex;
   align-items: center;
-  background: rgba(0,0,0,0.05);
+  background: rgba(0, 0, 0, 0.05);
   padding: 0.5rem 1rem;
   border-radius: 10px;
   gap: 0.5rem;
@@ -203,7 +204,7 @@
 
 @media (prefers-color-scheme: dark) {
   .searchBox {
-    background: rgba(255,255,255,0.05);
+    background: rgba(255, 255, 255, 0.05);
   }
 }
 
@@ -231,13 +232,13 @@
   overflow-x: auto;
 }
 
-table {
+.dataTable {
   width: 100%;
   border-collapse: collapse;
   text-align: left;
 }
 
-th {
+.tableHeaderCell {
   padding: 1rem;
   font-size: 0.875rem;
   font-weight: 600;
@@ -245,7 +246,7 @@ th {
   border-bottom: 1px solid var(--card-border);
 }
 
-td {
+.tableCell {
   padding: 1.25rem 1rem;
   border-bottom: 1px solid var(--card-border);
   font-size: 0.9375rem;

@@ -106,8 +106,8 @@ export default function Dashboard() {
             <main className={styles.mainContent}>
                 <header className={styles.contentHeader}>
                     <div className={styles.headerTitle}>
-                        <h1>Panoramica Progetto</h1>
-                        <p>Dati in tempo reale dal tuo database Supabase.</p>
+                        <h1 className={styles.headerTitleH1}>Panoramica Progetto</h1>
+                        <p className={styles.headerTitleP}>Dati in tempo reale dal tuo database Supabase.</p>
                     </div>
                     <div style={{ display: 'flex', gap: '1rem' }}>
                         <button onClick={fetchRooms} className={styles.filterBtn} style={{ padding: '0.75rem' }}>
@@ -142,7 +142,7 @@ export default function Dashboard() {
                 {/* Table Section */}
                 <section className={`${styles.tableSection} glass`}>
                     <div className={styles.tableHeader}>
-                        <h2>Dettaglio Room Data</h2>
+                        <h2 className={styles.tableHeaderH2}>Dettaglio Room Data</h2>
                         <div className={styles.tableActions}>
                             <div className={styles.searchBox}>
                                 <Search size={16} />
@@ -159,37 +159,37 @@ export default function Dashboard() {
                         {loading ? (
                             <div style={{ padding: '3rem', textAlign: 'center', opacity: 0.5 }}>Caricamento dati...</div>
                         ) : (
-                            <table>
+                            <table className={styles.dataTable}>
                                 <thead>
                                     <tr>
-                                        <th>ID</th>
-                                        <th>Nome Locale</th>
-                                        <th>Superficie</th>
-                                        <th>Finitura</th>
-                                        <th>Stato</th>
-                                        <th>Azione</th>
+                                        <th className={styles.tableHeaderCell}>ID</th>
+                                        <th className={styles.tableHeaderCell}>Nome Locale</th>
+                                        <th className={styles.tableHeaderCell}>Superficie</th>
+                                        <th className={styles.tableHeaderCell}>Finitura</th>
+                                        <th className={styles.tableHeaderCell}>Stato</th>
+                                        <th className={styles.tableHeaderCell}>Azione</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {rooms.length === 0 ? (
                                         <tr>
-                                            <td colSpan={6} style={{ textAlign: 'center', padding: '2rem' }}>
+                                            <td colSpan={6} className={styles.tableCell} style={{ textAlign: 'center', padding: '2rem' }}>
                                                 Nessun locale trovato nella tabella 'rooms'.
                                             </td>
                                         </tr>
                                     ) : (
                                         rooms.map((room) => (
                                             <tr key={room.id}>
-                                                <td><strong>{room.number || room.id}</strong></td>
-                                                <td>{room.name || 'Senza nome'}</td>
-                                                <td>{room.area ? `${room.area} m²` : '-'}</td>
-                                                <td><span className={styles.tagFinish}>{room.finish_wall || room.finish || 'Non spec.'}</span></td>
-                                                <td>
+                                                <td className={styles.tableCell}><strong>{room.number || room.id}</strong></td>
+                                                <td className={styles.tableCell}>{room.name || 'Senza nome'}</td>
+                                                <td className={styles.tableCell}>{room.area ? `${room.area} m²` : '-'}</td>
+                                                <td className={styles.tableCell}><span className={styles.tagFinish}>{room.finish_wall || room.finish || 'Non spec.'}</span></td>
+                                                <td className={styles.tableCell}>
                                                     <span className={`${styles.statusPill} ${getStatusClass(room.status || 'In Elaborazione')}`}>
                                                         {room.status || 'Sincronizzato'}
                                                     </span>
                                                 </td>
-                                                <td>
+                                                <td className={styles.tableCell}>
                                                     <button className={styles.editLink}>Modifica</button>
                                                 </td>
                                             </tr>
