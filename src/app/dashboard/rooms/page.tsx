@@ -1,60 +1,44 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { 
-    Map as MapIcon, 
-    Plus, 
-    Search, 
-    Filter, 
-    ArrowLeft 
-} from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
-import styles from '../dashboard.module.css'; // Riutilizziamo i tuoi stili
+import styles from '../dashboard.module.css';
+import { Map as MapIcon, Search, Plus, Trash2, Save } from 'lucide-react';
 
-interface Room {
-    id: string;
-    number?: string;
-    name?: string;
-    area?: string;
-    finish_wall?: string;
-    status?: string;
-}
-
-export default function RoomsPage() {
-    const [rooms, setRooms] = useState<Room[]>([]);
+export default function RoomsManagement() {
+    const [rooms, setRooms] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState("");
 
     useEffect(() => {
-        const fetchRooms = async () => {
-            const supabase = createClient();
-            const { data, error } = await supabase
-                .from('rooms')
-                .select('*')
-                .order('number', { ascending: true });
-
-            if (!error && data) {
-                setRooms(data as Room[]);
-            }
-            setLoading(false);
-        };
-
         fetchRooms();
     }, []);
 
+    const fetchRooms = async () => {
+        const supabase = createClient();
+        const { data, error } = await supabase
+            .from('rooms')
+            .select('*')
+            .order('room_number', { ascending: true });
+
+        if (!error && data) setRooms(data);
+        setLoading(false);
+    };
+
+    // Filtro ricerca (logica simile al tuo Streamlit)
+    const filteredRooms = rooms.filter(room => 
+        room.room_number?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        room.room_name_planned?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
     return (
         <div className={styles.dashboardContainer}>
-            {/* Sidebar semplificata o riutilizzata */}
             <main className={styles.mainContent}>
                 <header className={styles.topBar}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                        <Link href="/dashboard" className={styles.filterBtn}>
-                            <ArrowLeft size={18} />
-                        </Link>
-                        <h1 className={styles.welcomeText}>Gestione Locali</h1>
-                    </div>
+                    <h1 className={styles.welcomeText}>📍 Rooms Management</h1>
                 </header>
 
+                {/* Statistiche come nel tuo Streamlit */}
                 <section className={styles.statsGrid}>
                     <div className={styles.statCard}>
                         <div className={styles.statInfo}>
@@ -71,46 +55,44 @@ export default function RoomsPage() {
                     <div className={styles.tableHeader}>
                         <div className={styles.searchBar}>
                             <Search size={18} />
-                            <input type="text" placeholder="Cerca locale o numero..." className={styles.searchInput} />
+                            <input 
+                                type="text" 
+                                placeholder="Cerca numero o nome..." 
+                                className={styles.searchInput}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
                         </div>
-                        <button className={styles.addBtn}>
-                            <Plus size={18} /> Nuovo Locale
-                        </button>
                     </div>
 
                     <div className={styles.tableWrapper}>
-                        {loading ? (
-                            <p style={{ padding: '2rem' }}>Caricamento locali...</p>
-                        ) : (
-                            <table className={styles.dataTable}>
-                                <thead>
-                                    <tr>
-                                        <th className={styles.tableHeaderCell}>N. LOCALE</th>
-                                        <th className={styles.tableHeaderCell}>NOME</th>
-                                        <th className={styles.tableHeaderCell}>SUPERFICIE</th>
-                                        <th className={styles.tableHeaderCell}>FINITURA PARETI</th>
-                                        <th className={styles.tableHeaderCell}>STATO</th>
+                        <table className={styles.dataTable}>
+                            <thead>
+                                <tr>
+                                    <th className={styles.tableHeaderCell}>STATUS</th>
+                                    <th className={styles.tableHeaderCell}>NUMBER</th>
+                                    <th className={styles.tableHeaderCell}>NAME</th>
+                                    <th className={styles.tableHeaderCell}>AREA (m²)</th>
+                                    <th className={styles.tableHeaderCell}>LAST SYNC</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {loading ? (
+                                    <tr><td colSpan={5} style={{textAlign:'center', padding:'2rem'}}>Caricamento...</td></tr>
+                                ) : filteredRooms.map((room: any) => (
+                                    <tr key={room.id}>
+                                        <td className={styles.tableCell}>
+                                            {room.is_synced ? "✅" : "❌"}
+                                        </td>
+                                        <td className={styles.tableCell}><strong>{room.room_number}</strong></td>
+                                        <td className={styles.tableCell}>{room.room_name_planned}</td>
+                                        <td className={styles.tableCell}>{room.area || 0} m²</td>
+                                        <td className={styles.tableCell}>
+                                            {room.last_sync_at ? new Date(room.last_sync_at).toLocaleDateString() : "Mai"}
+                                        </td>
                                     </tr>
-                                </thead>
-                                <tbody>
-                                    {rooms.map((room) => (
-                                        <tr key={room.id}>
-                                            <td className={styles.tableCell}><strong>{room.number || room.id}</strong></td>
-                                            <td className={styles.tableCell}>{room.name || 'N/A'}</td>
-                                            <td className={styles.tableCell}>{room.area ? `${room.area} m²` : '-'}</td>
-                                            <td className={styles.tableCell}>
-                                                <span className={styles.tagFinish}>{room.finish_wall || 'Standard'}</span>
-                                            </td>
-                                            <td className={styles.tableCell}>
-                                                <span className={styles.statusPill}>
-                                                    {room.status || 'Sincronizzato'}
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        )}
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
                 </section>
             </main>
