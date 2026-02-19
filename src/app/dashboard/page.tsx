@@ -17,13 +17,23 @@ import {
 import { createClient } from '@/lib/supabase/client';
 import styles from './dashboard.module.css';
 
+interface Room {
+    id: string;
+    number?: string;
+    name?: string;
+    area?: string;
+    finish?: string;
+    finish_wall?: string;
+    status?: string;
+}
+
 export default function Dashboard() {
-    const [rooms, setRooms] = useState<any[]>([]);
+    const [rooms, setRooms] = useState<Room[]>([]);
     const [loading, setLoading] = useState(true);
     const [stats, setStats] = useState({ total: 0, area: 0, review: 85 });
-    const supabase = createClient();
 
     const fetchRooms = async () => {
+        const supabase = createClient();
         setLoading(true);
         try {
             const { data, error } = await supabase
@@ -33,13 +43,13 @@ export default function Dashboard() {
 
             if (error) throw error;
             if (data) {
-                setRooms(data);
+                setRooms(data as Room[]);
                 // Calcola statistiche reali
-                const totalArea = data.reduce((acc, room) => acc + (parseFloat(room.area) || 0), 0);
+                const totalArea = data.reduce((acc: number, room: any) => acc + (parseFloat(room.area) || 0), 0);
                 setStats({
                     total: data.length,
                     area: Math.round(totalArea),
-                    review: 85 // Questo potrebbe essere dinamico se hai un campo 'status'
+                    review: 85
                 });
             }
         } catch (err) {
@@ -51,6 +61,7 @@ export default function Dashboard() {
 
     useEffect(() => {
         fetchRooms();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const getStatusClass = (status: string) => {
@@ -174,7 +185,7 @@ export default function Dashboard() {
                                     {rooms.length === 0 ? (
                                         <tr>
                                             <td colSpan={6} className={styles.tableCell} style={{ textAlign: 'center', padding: '2rem' }}>
-                                                Nessun locale trovato nella tabella 'rooms'.
+                                                Nessun locale trovato nella tabella &apos;rooms&apos;.
                                             </td>
                                         </tr>
                                     ) : (
