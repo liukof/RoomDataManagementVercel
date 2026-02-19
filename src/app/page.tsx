@@ -1,10 +1,11 @@
 import Image from "next/image";
+import Link from "next/link";
 
 export default function Home() {
   return (
-    <div className="container" style={{ 
-      minHeight: '100vh', 
-      display: 'flex', 
+    <div className="container" style={{
+      minHeight: '100vh',
+      display: 'flex',
       flexDirection: 'column',
       backgroundImage: `radial-gradient(at 0% 0%, var(--glass-border) 0, transparent 50%), radial-gradient(at 50% 100%, var(--glass-border) 0, transparent 50%)`
     }}>
@@ -36,15 +37,16 @@ export default function Home() {
           <a href="#" style={{ opacity: 0.8 }}>Home</a>
           <a href="#" style={{ opacity: 0.8 }}>Progetti</a>
           <a href="#" style={{ opacity: 0.8 }}>Analisi</a>
-          <button style={{
+          <Link href="/dashboard" style={{
             background: 'var(--foreground)',
             color: 'var(--background)',
             border: 'none',
             padding: '0.5rem 1rem',
             borderRadius: '6px',
             fontWeight: 600,
-            cursor: 'pointer'
-          }}>Sign In</button>
+            cursor: 'pointer',
+            textDecoration: 'none'
+          }}>Sign In</Link>
         </nav>
       </header>
 
@@ -74,7 +76,7 @@ export default function Home() {
           </p>
 
           <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', marginBottom: '5rem' }}>
-            <button style={{
+            <Link href="/dashboard" style={{
               background: 'var(--accent)',
               color: 'white',
               border: 'none',
@@ -83,8 +85,9 @@ export default function Home() {
               fontSize: '1.1rem',
               fontWeight: 600,
               cursor: 'pointer',
+              textDecoration: 'none',
               boxShadow: '0 10px 15px -3px var(--accent-glow)'
-            }}>Inizia Ora</button>
+            }}>Inizia Ora</Link>
             <button className="glass" style={{
               padding: '1rem 2rem',
               borderRadius: '12px',
