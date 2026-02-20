@@ -1,16 +1,3 @@
-<<<<<<< HEAD
-import Link from 'next/link';
-
-export default function RoomsPage() {
-    return (
-        <div style={{ padding: '2rem', minHeight: '100vh', background: 'var(--background)', color: 'var(--foreground)' }}>
-            <h1>Locali</h1>
-            <p>Questa è la pagina placeholder per i Locali.</p>
-            <br />
-            <Link href="/dashboard" style={{ color: '#3b82f6', textDecoration: 'underline' }}>
-                &larr; Torna alla Dashboard
-            </Link>
-=======
 "use client";
 
 import { useEffect, useState } from 'react';
@@ -19,7 +6,7 @@ import styles from '../dashboard.module.css';
 import { Map as MapIcon, Search, Plus, Save, Trash2 } from 'lucide-react';
 
 export default function RoomsPage() {
-    const [rooms, setRooms] = useState([]);
+    const [rooms, setRooms] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
 
@@ -41,7 +28,7 @@ export default function RoomsPage() {
     }, []);
 
     // 2. Logica di ricerca (equivalente al filtro search_q in Streamlit)
-    const filteredRooms = rooms.filter(room => 
+    const filteredRooms = rooms.filter((room: any) =>
         room.room_number?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         room.room_name_planned?.toLowerCase().includes(searchTerm.toLowerCase())
     );
@@ -70,9 +57,9 @@ export default function RoomsPage() {
                     <div className={styles.tableHeader}>
                         <div className={styles.searchBar}>
                             <Search size={18} />
-                            <input 
-                                type="text" 
-                                placeholder="Cerca numero o nome..." 
+                            <input
+                                type="text"
+                                placeholder="Cerca numero o nome..."
                                 className={styles.searchInput}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
@@ -95,7 +82,7 @@ export default function RoomsPage() {
                             </thead>
                             <tbody>
                                 {loading ? (
-                                    <tr><td colSpan={5} style={{textAlign: 'center', padding: '2rem'}}>Caricamento...</td></tr>
+                                    <tr><td colSpan={5} style={{ textAlign: 'center', padding: '2rem' }}>Caricamento...</td></tr>
                                 ) : (
                                     filteredRooms.map((room: any) => (
                                         <tr key={room.id}>
@@ -116,7 +103,6 @@ export default function RoomsPage() {
                     </div>
                 </section>
             </main>
->>>>>>> 72758939d5f0a62445c14e5d1a209c841e984cbc
         </div>
     );
 }
